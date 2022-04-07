@@ -1,5 +1,5 @@
 {
-  "name": "unilearn-frontend",
+  "name": "unilearn",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "mysql": "^2.18.1",
     "next": "12.1.0",
     "next-auth": "^4.2.1",
     "react": "17.0.2",

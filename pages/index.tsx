@@ -1,10 +1,10 @@
-import type { NextPage } from 'next'
+import type { GetServerSideProps, InferGetServerSidePropsType, NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
-import { useSession, signIn, signOut } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
+import Header from '../components/header/Header'
 
-const Home: NextPage = () => {
-    const { data: session } = useSession();
+const Home: NextPage = ({ user }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
     return (
         <div className={styles.container}>
@@ -15,21 +15,30 @@ const Home: NextPage = () => {
             </Head>
 
             <main>
-                {!session && (
-                    <>
-                        <div>Not signed in</div>
-                        <button onClick={() => signIn()}>Sign in</button>
-                    </>
-                )}
-                {session && (
-                    <>
-                        <div>Signed in as {session.user?.name}</div>
-                        <button onClick={() => signOut()}>Sign out</button>
-                    </>
-                )}
+                <div>Signed in as {user.name}</div>
+                <button onClick={() => signOut()}>Sign out</button>
             </main>
         </div>
     )
 }
 
 export default Home
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const session = await getSession(context);
+
+    if (!session) {
+        return {
+            redirect: {
+                destination: '/signin',
+                permanent: false
+            }
+        }
+    }
+
+    return {
+        props: {
+            user: session.user
+        }
+    }
+}
