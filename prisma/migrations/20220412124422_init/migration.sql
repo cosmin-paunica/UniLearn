@@ -8,6 +8,7 @@ CREATE TABLE `accounts` (
     `refresh_token` TEXT NULL,
     `access_token` TEXT NULL,
     `expires_at` INTEGER NULL,
+    `ext_expires_in` INTEGER NULL,
     `token_type` VARCHAR(191) NULL,
     `scope` VARCHAR(191) NULL,
     `id_token` TEXT NULL,
@@ -24,6 +25,7 @@ CREATE TABLE `users` (
     `email` VARCHAR(191) NULL,
     `emailVerified` DATETIME(3) NULL,
     `image` VARCHAR(191) NULL,
+    `role` ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
 
     UNIQUE INDEX `users_email_key`(`email`),
     PRIMARY KEY (`id`)

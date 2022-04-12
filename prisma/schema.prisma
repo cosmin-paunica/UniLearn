@@ -29,14 +29,46 @@ model Account {
   @@map("accounts")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+
+  @@map("roles")
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  role          UserRole  @default(USER)
   accounts      Account[]
-  // sessions      Session[]
+  courses       UserInCourse[]
 
   @@map("users")
+}
+
+model Course {
+  id    String  @id @default(cuid())
+  name  String
+  users UserInCourse[]
+}
+
+enum CourseUserRole {
+  PROFESSOR
+  STUDENT
+}
+
+model UserInCourse {
+  userId    String
+  courseId  String
+  userRole  CourseUserRole
+
+  user      User @relation(fields: [userId], references: [id])
+  course    Course @relation(fields: [courseId], references: [id])
+
+  @@id([userId, courseId])
+
+  @@map("users_in_courses")
 }
