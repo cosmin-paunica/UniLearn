@@ -1,9 +1,7 @@
 import NextAuth from "next-auth";
 import AzureADProvider from 'next-auth/providers/azure-ad';
 import  { PrismaAdapter } from '@next-auth/prisma-adapter';
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../../../lib/prisma";
 
 const oneMonthInSeconds = 30 * 24 * 60 * 60;
 
@@ -23,5 +21,26 @@ export default NextAuth({
     },
     jwt: {
         maxAge: oneMonthInSeconds 
+    },
+    callbacks: {
+        // @ts-ignore
+        session: async ({ session }) => {
+            if (!session) return;
+            const user = await prisma.user.findUnique({
+                where: {
+                    email: session.user?.email!
+                }
+            })
+            return {
+                user: {
+                    email: user?.email,
+                    name: user?.name,
+                    image: user?.image,
+                    id: user?.id,
+                    role: user?.role
+                },
+                expires: session.expires
+            };
+        }
     }
 })

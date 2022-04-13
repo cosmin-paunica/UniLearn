@@ -1,13 +1,11 @@
 import type { GetServerSideProps, InferGetServerSidePropsType, NextPage } from 'next'
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
 import { signOut, getSession } from 'next-auth/react'
-import Header from '../components/header/Header'
 
 const Home: NextPage = ({ user }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
     return (
-        <div className={styles.container}>
+        <div>
             <Head>
                 <title>UniLearn</title>
                 <meta name="description" content="E learning platform" />
