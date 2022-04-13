@@ -11,9 +11,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).json({ error: 'Unauthenticated' });
     }
 
+    // if not ADMIN, respond with 403 Forbidden
     // @ts-ignore
     if (session!.user!.role.toLocaleUpperCase() != 'ADMIN') {
-        return res.status(404).json({ error: 'Unauthorized' });
+        return res.status(403).json({ error: 'Unauthorized' });
     }
     
     switch (req.method) {
@@ -22,13 +23,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(200).json(courses);
 
         case 'POST':
-            const name = req.body.name;
-            const user = await prisma.course.create({
-                data: { name }
+            const course = await prisma.course.create({
+                data: {
+                    name: req.body.name,
+                    year: parseInt(req.body.year),
+                    semester: parseInt(req.body.semester)
+                }
             })
-            return res.status(201).json(user);
+            return res.status(201).json(course);
 
         default:
-            res.status(405).json({ error: 'Method not allowed' })
+            return res.status(405).json({ error: 'Method not allowed' })
     }
 }

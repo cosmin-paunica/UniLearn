@@ -2,37 +2,12 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import Head from 'next/head'
 import { getSession } from 'next-auth/react'
 import { useEffect, useState } from 'react';
-import { User, Course } from '@prisma/client';
+import { Course } from '@prisma/client';
 import AddCourseForm from '../components/AddCourseForm';
+import UsersContainer from '../components/UsersContainer';
+import CoursesContainer from '../components/CoursesContainer';
 
 export default function Admin({ user }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-
-    const [users, setUsers] = useState([]);
-    const [courses, setCourses] = useState([]);
-
-    const getUsers = async () => {
-        const res = await fetch('./api/user');
-        const users = await res.json();
-        setUsers(users);
-    }
-
-    const getCourses = async () => {
-        const res = await fetch('./api/course');
-        const courses = await res.json();
-        setCourses(courses);
-    }
-
-    useEffect(() => {
-        getUsers();
-        getCourses();
-    }, []);
-
-    const [addCourseFormClassName, setAddCourseFormClassName] = useState('closed');
-
-    const switchAddCourseForm = () => {
-        const newClassName: string = addCourseFormClassName === 'closed' ? 'open' : 'closed';
-        setAddCourseFormClassName(newClassName);
-    };
 
     return (
         <div>
@@ -43,25 +18,8 @@ export default function Admin({ user }: InferGetServerSidePropsType<typeof getSe
             </Head>
 
             <main>
-                <h2>Users</h2>
-                <ul>
-                    {users.map((user: User) => (
-                        <li key={user.email}>{user.email}</li>
-                    ))}
-                </ul>
-
-                <h2>Courses</h2>
-
-                <div>
-                    <button onClick={switchAddCourseForm}>Add a course</button>
-                    <AddCourseForm className={addCourseFormClassName} />
-                </div>
-
-                <ul>
-                    {courses.map((course: Course) => (
-                        <li key={user.email}>{course.name}</li>
-                    ))}
-                </ul>
+                <UsersContainer />
+                <CoursesContainer />
             </main>
         </div>
     )

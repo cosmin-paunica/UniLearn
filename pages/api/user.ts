@@ -13,13 +13,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // @ts-ignore
     if (session!.user!.role.toLocaleUpperCase() != 'ADMIN') {
-        return res.status(404).json({ error: 'Unauthorized' });
+        return res.status(403).json({ error: 'Unauthorized' });
     }
     
     switch (req.method) {
         case 'GET':
             const users = await prisma.user.findMany();
             return res.status(200).json(users);
+            
         default:
             return res.status(405).json({ error: 'Method not allowed' })
     }

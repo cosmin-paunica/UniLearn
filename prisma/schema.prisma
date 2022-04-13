@@ -10,7 +10,7 @@ generator client {
 model Account {
   id                String  @id @default(cuid())
   userId            String
-  type              String 
+  type              String
   provider          String
   providerAccountId String
   refresh_token     String? @db.Text
@@ -24,8 +24,8 @@ model Account {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
 
+  @@unique([provider, providerAccountId])
   @@map("accounts")
 }
 
@@ -37,12 +37,12 @@ enum UserRole {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String 
-  email         String    @unique
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
   emailVerified DateTime?
   image         String?
-  role          UserRole  @default(USER)
+  role          UserRole       @default(USER)
   accounts      Account[]
   courses       UserInCourse[]
 
@@ -50,9 +50,11 @@ model User {
 }
 
 model Course {
-  id    String  @id @default(cuid())
-  name  String
-  users UserInCourse[]
+  id       String         @id @default(cuid())
+  name     String
+  year     Int
+  semester Int
+  users    UserInCourse[]
 }
 
 enum CourseUserRole {
@@ -61,14 +63,14 @@ enum CourseUserRole {
 }
 
 model UserInCourse {
-  userId    String
-  courseId  String
-  userRole  CourseUserRole
+  userId   String
+  courseId String
+  userRole CourseUserRole
 
-  user      User @relation(fields: [userId], references: [id])
-  course    Course @relation(fields: [courseId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
 
   @@id([userId, courseId])
-
   @@map("users_in_courses")
 }

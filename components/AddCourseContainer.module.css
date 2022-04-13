@@ -5,3 +5,7 @@
 .open {
     display: block;
 }
+
+.submitButton {
+    width: 100%;
+}
