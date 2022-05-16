@@ -1,16 +1,13 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import Head from 'next/head'
 import { getSession } from 'next-auth/react'
-import { useEffect, useState } from 'react';
-import { Course } from '@prisma/client';
-import AddCourseForm from '../components/AddCourseForm';
-import UsersContainer from '../components/UsersContainer';
-import CoursesContainer from '../components/CoursesContainer';
+import AdminUsersContainer from '../../components/AdminUsersContainer';
+import AdminCoursesContainer from '../../components/AdminCoursesContainer';
 
 export default function Admin({ user }: InferGetServerSidePropsType<typeof getServerSideProps>) {
 
     return (
-        <div>
+        <>
             <Head>
                 <title>Admin :: UniLearn</title>
                 <meta name="description" content="E learning platform" />
@@ -18,10 +15,10 @@ export default function Admin({ user }: InferGetServerSidePropsType<typeof getSe
             </Head>
 
             <main>
-                <UsersContainer />
-                <CoursesContainer />
+                <AdminCoursesContainer />
+                <AdminUsersContainer />
             </main>
-        </div>
+        </>
     )
 }
 

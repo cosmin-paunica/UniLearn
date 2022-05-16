@@ -4,7 +4,7 @@ import Head from "next/head"
 
 const SignIn = () => {
     return (
-        <div>
+        <>
             <Head>
                 <title>Sign in :: UniLearn</title>
                 <meta name="description" content="E learning platform" />
@@ -14,7 +14,7 @@ const SignIn = () => {
             <main>
                 <button onClick={() => signIn("azure-ad")}>Sign in with Microsoft account</button>
             </main>
-        </div>
+        </>
     )
 }
 

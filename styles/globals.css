@@ -15,6 +15,26 @@ a {
   box-sizing: border-box;
 }
 
+body {
+  height: 100vh;
+}
+
 main {
-  padding: 0% 10%;
+  padding: 10px 10%;
+}
+
+.table {
+  text-align: left;
+}
+
+.table th:hover {
+  cursor: pointer;
+}
+
+.table td, .table th {
+  padding: 5px;
+}
+
+.table>tbody tr:nth-child(odd) {
+  background-color: rgb(232, 232, 232);
 }

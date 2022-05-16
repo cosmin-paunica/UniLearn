@@ -1,0 +1,10 @@
+.card {
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.card h3 {
+    margin: 0px 0px 10px 0px;
+}
