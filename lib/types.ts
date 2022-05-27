@@ -5,3 +5,5 @@ export type CourseWithUsers = Course & { users: (UserInCourse & { user: User })[
 export type CourseWithAssignments = Course & { assignments: Assignment[] }
 
 export type CourseWithUsersAndAssignments = CourseWithUsers & CourseWithAssignments
+
+export type SessionUser = User & { id: string }
