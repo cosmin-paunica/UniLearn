@@ -32,8 +32,6 @@ export default function AdminCoursesContainer() {
 
         const targetElement = event.target as HTMLFormElement;
 
-        console.log(targetElement.courseName.value);
-
         const res = await fetch('../api/courses', {
             method: 'POST',
             body: JSON.stringify({

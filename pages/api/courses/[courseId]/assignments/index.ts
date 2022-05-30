@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import  { getSession } from 'next-auth/react'
 import prisma from "../../../../../lib/prisma";
-import { CourseUserRole } from "@prisma/client";
 import { SessionUser } from "../../../../../lib/types";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -35,9 +34,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const assignment = await prisma.assignment.create({
                 data: {
                     courseId: req.query.courseId as string,
-                    title: req.query.title as string,
-                    description: req.query.title as string,
-                    deadline: req.query.deadline as string  // TODO: MODIFICAAAAAAAA STRING
+                    title: req.body.title as string,
+                    description: req.body.description as string,
+                    deadline: new Date(req.body.deadline as string)
                 }
             })
             return res.status(201).json(assignment);
