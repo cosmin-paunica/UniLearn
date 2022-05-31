@@ -19,22 +19,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).json({ error: 'Unauthenticated' });
     }
 
-    // if user is not PROFESSOR in this course, respond with 403 Forbidden
-    // const userRoleInCourse = (await prisma.userInCourse.findFirst({
-    //     where: {
-    //         userId: (session!.user! as SessionUser).id,
-    //         courseId: req.query.courseId as string
-    //     },
-    //     select: {
-    //         userRole: true
-    //     }
-    // }))?.userRole;
-    // if (userRoleInCourse != 'PROFESSOR') {
-    //     return res.status(403).json({ error: 'Unauthorized' })
-    // }
-
     switch(req.method) {
         case('POST'):
+
+            // if the user is not a student in the course of the assignment, return 403 Forbidden
+            const assignment = await prisma.assignment.findFirst({
+                where: { id: req.query.assignmentId as string },
+                include: {
+                    course: {
+                        include: {
+                            users: {
+                                where: { userId: req.query.userId as string }
+                            }
+                        }
+                    }
+                }
+            });
+            const userRoleInCourse = assignment?.course.users[0].userRole;
+            if (!userRoleInCourse || userRoleInCourse != 'STUDENT') {
+                return res.status(403).json({ error: "Unauthorized" })
+            }
+
             const form = new formidable.IncomingForm();
             form.parse(req, async (err, fields, files) => {
                 const file = files.file as formidable.File;
@@ -45,15 +50,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 await saveFile(file);
 
+                const assignmentId = req.query.assignmentId as string;
+                const studentId = req.query.studentId as string;
                 const assignment = await prisma.assignment.update({
                     data: {
                         fileUploads: {
-                            create: [{
-                                fileName: newFilename,
-                                student: {
-                                    connect: { id: req.query.studentId as string }
+                            upsert: {
+                                where: {
+                                    assignmentId_studentId: { assignmentId, studentId }
+                                },
+                                create: {
+                                    fileName: newFilename,
+                                    student: {
+                                        connect: { id: studentId }
+                                    }
+                                },
+                                update: {
+                                    fileName: newFilename
                                 }
-                            }]
+                            }
                         }
                     },
                     where: {

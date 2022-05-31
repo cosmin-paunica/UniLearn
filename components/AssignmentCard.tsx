@@ -3,7 +3,7 @@ import { getSession } from "next-auth/react";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { SessionUser } from "../lib/types";
 
-export default function AssignmentCard({ assignment, userId }: { assignment: Assignment, userId: string }) {
+export default function AssignmentCard({ assignment, userId, userRole }: { assignment: Assignment, userId: string, userRole: string }) {
 
     const [file, setFile] = useState<File | null>(null);
 
@@ -31,10 +31,13 @@ export default function AssignmentCard({ assignment, userId }: { assignment: Ass
             <h3>{assignment.title}</h3>
             <div>{assignment.description}</div>
             <div>Deadline: {assignment.deadline}</div>
-            <form onSubmit={handleFileSubmit}>
-                <input type="file" id="file" name="file" onChange={handleLocalUpload} />
-                <input type="submit" value="Upload" />
-            </form>
+            {userRole == 'STUDENT' && (
+                <form onSubmit={handleFileSubmit}>
+                    <input type="file" id="file" name="file" onChange={handleLocalUpload} />
+                    <input type="submit" value="Upload" />
+                </form>
+            )}
+            
         </div>
     )
 }

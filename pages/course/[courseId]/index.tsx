@@ -26,7 +26,7 @@ export default function Course({ course, userRole, assignmentsJSONable: assignme
 
                 {userRole == 'PROFESSOR' && <AddAssignmentForm courseId={course.id} />}
 
-                {assignments.map((assignment: Assignment) => <AssignmentCard key={assignment.id} assignment={assignment} userId={userId} />)}
+                {assignments.map((assignment: Assignment) => <AssignmentCard key={assignment.id} assignment={assignment} userId={userId} userRole={userRole} />)}
             </main>
         </>
     )
@@ -55,6 +55,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
     });
 
+    if (!course) { return { notFound: true } }
+
     const assignments = await prisma.assignment.findMany({
         where: { courseId: id },
         orderBy: [{ deadline: 'desc' }]
@@ -76,7 +78,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         deadline: deadline.toLocaleString()
     }));
 
-    const userRole = course?.users.find(user => user.userId == (session.user as SessionUser).id)?.userRole;
+    const userRole = (await prisma.userInCourse.findFirst({
+        where: {
+            courseId: id,
+            userId: (session.user as SessionUser).id
+        },
+        select: { userRole: true }
+    }))?.userRole;
 
     return {
         props: { course, userRole, assignmentsJSONable, userId: (session.user as SessionUser).id }

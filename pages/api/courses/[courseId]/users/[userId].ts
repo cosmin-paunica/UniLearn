@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import  { getSession } from 'next-auth/react'
 import prisma from "../../../../../lib/prisma";
 import { CourseUserRole } from "@prisma/client";
+import { SessionUser } from "../../../../../lib/types";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
@@ -12,8 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // if not ADMIN, respond with 403 Forbidden
-    // @ts-ignore
-    if (session!.user!.role.toLocaleUpperCase() != 'ADMIN') {
+    if ((session!.user! as SessionUser).role.toLocaleUpperCase() != 'ADMIN') {
         return res.status(403).json({ error: 'Unauthorized' });
     }
 

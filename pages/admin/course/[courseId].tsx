@@ -123,6 +123,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
     })
 
+    if (!course) { return { notFound: true } }
+
     return {
         props: { course }
     }
