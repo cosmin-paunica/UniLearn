@@ -1,21 +1,43 @@
-import { FormEvent } from "react"
+import { FormEvent, useState } from "react"
+import { validateAddAssignmentFormData } from "../lib/validations";
 
 export default function AddAssignmentForm(props: { courseId: string }) {
+
+    const [invalidData, setInvalidData] = useState(false);
+    const [addedAssignmentTitle, setAddedAssignmentTitle] = useState<string | null>(null);
+
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
 
         const targetElement = event.target as HTMLFormElement;
 
-        const res = await fetch(`/api/courses/${props.courseId}/assignments`, {
-            method: 'POST',
-            body: JSON.stringify({
+        try {
+            const formData = {
                 // @ts-ignore
-                title: targetElement.title.value,
-                description: targetElement.description.value,
-                deadline: targetElement.deadline.value
-            }),
-            headers: { 'Content-Type': 'application/json' }
-        })
+                title: targetElement.title.value.trim(),
+                description: targetElement.description.value.trim(),
+                deadline: targetElement.deadline.value.trim()
+            }
+    
+            if (!validateAddAssignmentFormData(formData)) {
+                throw new Error('Invalid data');
+            }
+    
+            const res = await fetch(`/api/courses/${props.courseId}/assignments`, {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.error) {
+                throw new Error('Invalid data');
+            }
+            setAddedAssignmentTitle(data.title);
+        } catch {
+            setAddedAssignmentTitle(null);
+            setInvalidData(true);
+        }
+        
     }
     
     return (
@@ -42,6 +64,8 @@ export default function AddAssignmentForm(props: { courseId: string }) {
                     </tbody>
                 </table>
             </form>
+            {addedAssignmentTitle && <div className="successMessage">Successfully added assignment: {addedAssignmentTitle}</div>}
+            {invalidData && <div className="errorMessage">Invalid data</div>}
         </>
     )
 }

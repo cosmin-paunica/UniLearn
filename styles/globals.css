@@ -38,3 +38,11 @@ main {
 .table>tbody tr:nth-child(odd) {
   background-color: rgb(232, 232, 232);
 }
+
+.successMessage {
+  color: green;
+}
+
+.errorMessage {
+  color: red;
+}

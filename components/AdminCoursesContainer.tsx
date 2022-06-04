@@ -2,6 +2,7 @@ import { Course } from '@prisma/client';
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { getAllAcademicYears } from '../lib/helper_functions';
+import { validateAddCourseFormData } from '../lib/validations';
 import styles from './AdminCoursesContainer.module.css'
 import CoursesTable from './CoursesTable';
 
@@ -11,6 +12,7 @@ export default function AdminCoursesContainer() {
     const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('');
     const [addedCourse, setAddedCourse] = useState<Course | null>(null);
     const [formClassName, setFormClassName] = useState(styles.closed);
+    const [invalidData, setInvalidData] = useState(false);
 
     const getCourses = async () => {
         const res = await fetch(`./api/courses`);
@@ -32,19 +34,39 @@ export default function AdminCoursesContainer() {
 
         const targetElement = event.target as HTMLFormElement;
 
-        const res = await fetch('../api/courses', {
-            method: 'POST',
-            body: JSON.stringify({
+        try {
+            const formData = {
                 name: targetElement.courseName.value,
                 academicYear: targetElement.academicYear.value,
-                year: targetElement.year.value,
-                semester: targetElement.semester.value
-            }),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        const addedCourse = await res.json();
-        setAddedCourse(addedCourse);
-        setCourses(courses.concat([addedCourse]).sort(compareCourses));
+                year: parseInt(targetElement.year.value),
+                semester: parseInt(targetElement.semester.value)
+            }
+
+            if (!validateAddCourseFormData(formData)) {
+                throw new Error('Invalid data');
+            }
+    
+            const res = await fetch('../api/courses', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: targetElement.courseName.value,
+                    academicYear: targetElement.academicYear.value,
+                    year: targetElement.year.value,
+                    semester: targetElement.semester.value
+                }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const addedCourse = await res.json();
+            if (addedCourse.error) {
+                throw new Error('Invalid data');
+            }
+            setInvalidData(false);
+            setAddedCourse(addedCourse);
+            setCourses(courses.concat([addedCourse]).sort(compareCourses));
+        } catch {
+            setInvalidData(true);
+            setAddedCourse(null);
+        }
     }
 
     return (
@@ -70,19 +92,19 @@ export default function AdminCoursesContainer() {
                         <tbody>
                             <tr>
                                 <td><label htmlFor='name'>Name</label></td>
-                                <td><input type='text' id='courseName' name='courseName' placeholder='Course name' required /></td>
+                                <td><input type='text' id='courseName' name='courseName' placeholder='Course name' /></td>
                             </tr>
                             <tr>
                                 <td><label htmlFor='academicYear'>Academic year</label></td>
-                                <td><input type='text' id='academicYear' name='academicYear' placeholder='2021-2022' required /></td>
+                                <td><input type='text' id='academicYear' name='academicYear' placeholder='2021-2022' /></td>
                             </tr>
                             <tr>
                                 <td><label htmlFor='year'>Year</label></td>
-                                <td><input type='number' id='year' name='year' placeholder='Course year' required /></td>
+                                <td><input type='number' id='year' name='year' placeholder='Course year' /></td>
                             </tr>
                             <tr>
                                 <td><label htmlFor='semester'>Semester</label></td>
-                                <td><input type='number' id='semester' name='semester' placeholder='Course semester' required /></td>
+                                <td><input type='number' id='semester' name='semester' placeholder='Course semester' /></td>
                             </tr>
                             <tr>
                                 <td colSpan={2}><input type='submit' value='Add course' className={styles.submitButton} /></td>
@@ -92,10 +114,12 @@ export default function AdminCoursesContainer() {
                 </form>
 
                 {addedCourse && (
-                    <div>
+                    <div className="successMessage">
                         Successfully added course {addedCourse['name']}
                     </div>
                 )}
+
+                {invalidData && <div className="errorMessage">Invalid data</div>}
             </div>
         </div>
     )

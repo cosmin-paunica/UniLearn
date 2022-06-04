@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import  { getSession } from 'next-auth/react'
 import prisma from "../../../../../lib/prisma";
 import { SessionUser } from "../../../../../lib/types";
+import { validateAddAssignmentFormData } from "../../../../../lib/validations";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
@@ -31,6 +32,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(200).json(assignments);
 
         case('POST'):
+            const dataToValidate = {
+                title: req.body.title as string,
+                description: req.body.description as string,
+                deadline: req.body.deadline as string
+            }
+
+            if (!validateAddAssignmentFormData(dataToValidate)) {
+                return res.status(400).json({ error: 'Invalid data' })
+            }
+
             const assignment = await prisma.assignment.create({
                 data: {
                     courseId: req.query.courseId as string,
