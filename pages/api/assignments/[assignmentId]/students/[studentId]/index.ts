@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const assignmentId = req.query.assignmentId as string;
-    const studentId = req.query.userId as string;
+    const studentId = req.query.studentId as string;
 
     switch(req.method) {
         case('POST'):
@@ -50,8 +50,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             // if the user is not a student in the course of the assignment, return 403 Forbidden
-            const userRoleInCourse = assignment?.course.users[0].userRole;
-            if (!userRoleInCourse || userRoleInCourse != 'STUDENT') {
+            const userRoleInCourse = assignment!.course.users[0].userRole;
+            if (userRoleInCourse != 'STUDENT') {
                 return res.status(403).json({ error: "Unauthorized" })
             }
 
@@ -67,7 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const file = files.file as formidable.File;
                 
                 const extension = file.originalFilename!.split('.').pop();
-                const newFilename = `${assignmentTitle}-${assignmentId.substring(0, 5)}-${studentName}-${studentId.substring(0, 5)}.${extension}`;
+                const newFilename = `${assignmentTitle}-${assignmentId.substring(0, 6)}-${studentName}-${studentId.substring(0, 6)}.${extension}`;
                 file.newFilename = newFilename;
                 
                 await saveFile(file);
@@ -93,6 +93,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                     where: {
                         id: req.query.assignmentId as string
+                    },
+                    include: {
+                        fileUploads: {
+                            where: { assignmentId, studentId }
+                        }
                     }
                 })
 
