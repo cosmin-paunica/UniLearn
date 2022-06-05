@@ -11,6 +11,7 @@ export const config = {
     }
 };
 
+// POST: upload a file from a student to an assignment
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // if not authenticated, respond with 401 Unauthorized
@@ -19,39 +20,58 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).json({ error: 'Unauthenticated' });
     }
 
+    const assignmentId = req.query.assignmentId as string;
+    const studentId = req.query.userId as string;
+
     switch(req.method) {
         case('POST'):
 
-            // if the user is not a student in the course of the assignment, return 403 Forbidden
+            // if logged in user id is not the same as the user id in the query, return 403 Forbidden
+            // this way, we also ensure that the user in the query exists
+            if ((session.user as SessionUser).id != studentId) {
+                return res.status(403).json({ error: "Unauthorized" })
+            }
+
+            // select the assignment and the user role in the parent-course of the assignment
             const assignment = await prisma.assignment.findFirst({
-                where: { id: req.query.assignmentId as string },
+                where: { id: assignmentId },
                 include: {
                     course: {
                         include: {
                             users: {
-                                where: { userId: req.query.userId as string }
+                                where: { userId: studentId }
                             }
                         }
                     }
                 }
             });
+            if (!assignment) {
+                return res.status(404).json({ error: "Not found" });
+            }
+
+            // if the user is not a student in the course of the assignment, return 403 Forbidden
             const userRoleInCourse = assignment?.course.users[0].userRole;
             if (!userRoleInCourse || userRoleInCourse != 'STUDENT') {
                 return res.status(403).json({ error: "Unauthorized" })
             }
+
+            const student = await prisma.user.findFirst({
+                where: { id: studentId }
+            });
+            // will be needed to create a name for the uploaded file
+            const studentName = student!.name;
+            const assignmentTitle = assignment.title;
 
             const form = new formidable.IncomingForm();
             form.parse(req, async (err, fields, files) => {
                 const file = files.file as formidable.File;
                 
                 const extension = file.originalFilename!.split('.').pop();
-                const newFilename = `${req.query.assignmentId}-${req.query.studentId}.${extension}`;
+                const newFilename = `${assignmentTitle}-${assignmentId.substring(0, 5)}-${studentName}-${studentId.substring(0, 5)}.${extension}`;
                 file.newFilename = newFilename;
                 
                 await saveFile(file);
 
-                const assignmentId = req.query.assignmentId as string;
-                const studentId = req.query.studentId as string;
                 const assignment = await prisma.assignment.update({
                     data: {
                         fileUploads: {

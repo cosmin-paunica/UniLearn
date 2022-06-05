@@ -69,8 +69,8 @@ model UserInCourse {
   courseId String
   userRole CourseUserRole
 
-  user   User   @relation(fields: [userId], references: [id])
-  course Course @relation(fields: [courseId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@id([userId, courseId])
   @@map("users_in_courses")
@@ -85,7 +85,7 @@ model Assignment {
   deadline    DateTime
   fileUploads AssignmentFileUpload[]
 
-  course Course @relation(fields: [courseId], references: [id])
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@map("assignments")
 }
@@ -96,8 +96,8 @@ model AssignmentFileUpload {
   dateUploaded DateTime @default(now())
   fileName     String
 
-  assignment Assignment @relation(fields: [assignmentId], references: [id])
-  student    User       @relation(fields: [studentId], references: [id])
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
 
   @@id([assignmentId, studentId])
   @@map("assignment_file_uploads")
