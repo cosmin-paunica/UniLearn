@@ -4,6 +4,7 @@ import prisma from "../../../../../lib/prisma";
 import { CourseUserRole } from "@prisma/client";
 import { SessionUser } from "../../../../../lib/types";
 
+// PUT: add a user to a course
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // if not authenticated, respond with 401 Unauthorized

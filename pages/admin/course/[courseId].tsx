@@ -4,26 +4,45 @@ import { getSession } from 'next-auth/react'
 import Head from "next/head";
 import { FormEvent, useState } from "react";
 import prisma from "../../../lib/prisma";
+import { validateEmail } from '../../../lib/validations';
 
 export default function AdminCourse({ course }: InferGetServerSidePropsType<typeof getServerSideProps>) {
 
-    // @ts-ignore
-    const [usersInCourse, setUsersInCourse] = useState(course.users);
+    const usersInCourse = course.users;
+
+    const [addedUser, setAddedUser] = useState(false);
+    const [errorAddingUser, setErrorAddingUser] = useState("");
 
     const handleSubmit = async (event: FormEvent) => {
-        event.preventDefault();
 
+        event.preventDefault();
         const targetElement = event.target as HTMLFormElement;
-        
-        const userEmail = targetElement.email.value;
-        const userRes = await fetch(`../../api/users?email=${userEmail}`);
-        const [{ id: userId }] = await userRes.json();
-        
-        const userRole = targetElement.role.value;
-        const updatedCourseRes = await fetch(`../../api/courses/${course.id}/users/${userId}?userRole=${userRole}`, {
-            method: 'PUT'
-        });
-        const updatedCourse = await updatedCourseRes.json();
+
+        try {
+            const userEmail = targetElement.email.value;
+            if (!validateEmail(userEmail)) {
+                throw new Error("Invalid email");
+            }
+
+            const userRes = await fetch(`../../api/users?email=${userEmail}`);
+            const users: User[] = await userRes.json();
+            if (!users || users.length == 0) {
+                throw new Error("User not found");
+            }
+            const { id: userId } = users[0];
+            
+            const userRole = targetElement.role.value;
+            const updatedCourseRes = await fetch(`../../api/courses/${course.id}/users/${userId}?userRole=${userRole}`, {
+                method: 'PUT'
+            });
+            const updatedCourse = await updatedCourseRes.json();
+
+            setErrorAddingUser("");
+            setAddedUser(true);
+        } catch(err: any) {
+            setAddedUser(false);
+            setErrorAddingUser(err.message);
+        }
     }
 
     return (
@@ -37,7 +56,7 @@ export default function AdminCourse({ course }: InferGetServerSidePropsType<type
             <main>
                 <h1>{course.name}, {course.academicYear} - Admin</h1>
 
-                <button>Add a new user to this course</button>
+                <h2>Add a new user to this course</h2>
                 <form onSubmit={handleSubmit}>
                     <table>
                         <tbody>
@@ -60,30 +79,54 @@ export default function AdminCourse({ course }: InferGetServerSidePropsType<type
                         </tbody>
                     </table>
                 </form>
+                {errorAddingUser && <div className="errorMessage">{errorAddingUser}</div>}
+                {addedUser && <div className="successMessage">User added successfully</div>}
                 
                 <h2>Users</h2>
 
                 <h3>Professors</h3>
 
-                <ul>
-                    {usersInCourse.filter((user: UserInCourse) => {
-                        return user.userRole.toLocaleUpperCase() === CourseUserRole.PROFESSOR.toString();
-                    // @ts-ignore
-                    }).map((userInCourse: UserInCourse) => userInCourse.user).map((user: User) => (
-                        <li key={user.email}>{user.name}</li>
-                    ))}
-                </ul>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {usersInCourse.filter((user: UserInCourse) => {
+                            return user.userRole.toLocaleUpperCase() === CourseUserRole.PROFESSOR.toString();
+                        // @ts-ignore
+                        }).map((userInCourse: UserInCourse) => userInCourse.user).map((user: User) => (
+                            <tr key={user.email}>
+                                <td>{user.name}</td>
+                                <td>{user.email}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
 
                 <h3>Students</h3>
 
-                <ul>
-                    {usersInCourse.filter((user: UserInCourse) => {
-                        return user.userRole.toLocaleUpperCase() === CourseUserRole.STUDENT.toString();
-                    // @ts-ignore
-                    }).map((userInCourse: UserInCourse) => userInCourse.user).map((user: User) => (
-                        <li>{user.name}</li>
-                    ))}
-                </ul>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {usersInCourse.filter((user: UserInCourse) => {
+                            return user.userRole.toLocaleUpperCase() === CourseUserRole.STUDENT.toString();
+                        // @ts-ignore
+                        }).map((userInCourse: UserInCourse) => userInCourse.user).map((user: User) => (
+                            <tr key={user.email}>
+                                <td>{user.name}</td>
+                                <td>{user.email}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </main>
         </>
     )

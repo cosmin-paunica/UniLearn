@@ -16,3 +16,7 @@ export function getProfessorNamesAsString(course: Course & {users: (UserInCourse
     const profString = names.length > 1 ? 'Profesori' : 'Profesor';
     return `${profString}: ${namesString}`
 }
+
+export function localeDateToDate(dateString: string) {
+    return new Date(dateString.substring(0, 10).split('.').reverse().join('.') + dateString.substring(12));
+}

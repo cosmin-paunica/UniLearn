@@ -4,6 +4,8 @@ import prisma from "../../../../../lib/prisma";
 import { SessionUser } from "../../../../../lib/types";
 import { validateAddAssignmentFormData } from "../../../../../lib/validations";
 
+// GET: returns all assignments for a course
+// POST: create a new assignment for a course
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // if not authenticated, respond with 401 Unauthorized

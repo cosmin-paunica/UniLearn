@@ -1,9 +1,12 @@
 .header {
     color: white;
     background-color: black;
-    padding: 10px;
     display: flex;
     justify-content: space-between;
+}
+
+.leftSide {
+    padding: 10px;
 }
 
 .rightSide {
@@ -15,3 +18,22 @@
     font-size: 40px;
 }
 
+.rightSide>div {
+    border-left: 2px solid gray;
+    padding: 0px 20px;
+    vertical-align: middle;
+    line-height: 4.6;
+}
+
+.signOutButton {
+    color: white;
+    background-color: black;
+    height: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0px;
+}
+
+.signOutButton:hover {
+    cursor: pointer;
+}

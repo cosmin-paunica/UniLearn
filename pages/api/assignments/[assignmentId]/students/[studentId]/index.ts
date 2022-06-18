@@ -49,6 +49,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(404).json({ error: "Not found" });
             }
 
+            if (assignment.deadline < new Date(Date.now())) {
+                return res.status(400).json({ error: "Deadline has passed" });
+            }
+
             // if the user is not a student in the course of the assignment, return 403 Forbidden
             const userRoleInCourse = assignment!.course.users[0].userRole;
             if (userRoleInCourse != 'STUDENT') {
@@ -113,7 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 const saveFile = async (file: formidable.File) => {
     const data = fs.readFileSync(file.filepath);
-    fs.writeFileSync(`./public/assignment_file_uploads/${file.newFilename}`, data);
+    fs.writeFileSync(`./resources/assignment_file_uploads/${file.newFilename}`, data);
     await fs.unlinkSync(file.filepath);
     return;
 }

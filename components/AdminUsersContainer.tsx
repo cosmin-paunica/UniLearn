@@ -5,7 +5,7 @@ import styles from './AdminUsersContainer.module.css'
 
 export default function UsersContainer() {
     
-    const [users, setUsers] = useState([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [sortCrit, setSortCrit] = useState<keyof User>('email');
     const [sortOrder, setSortOrder] = useState('asc');
     const [searchCrit, setSearchCrit] = useState('');
@@ -22,9 +22,19 @@ export default function UsersContainer() {
     }, [])
 
     const sort = (crit: keyof User) => {
-        const sortedUsers = [...users].sort(
-            (user1, user2) => user1[crit] < user2[crit] ? -1 : 1
-        );
+        let sortedUsers: User[];
+
+        if (crit == 'name') {
+            // sort by last name
+            sortedUsers = [...users].sort(
+                (user1: User, user2: User) => user1.name.split(' ').pop()! < user2.name.split(' ').pop()! ? -1 : 1
+            );
+        } else {
+            sortedUsers = [...users].sort(
+                (user1, user2) => user1[crit]! < user2[crit]! ? -1 : 1
+            );
+        }
+
         if (sortOrder == 'desc') {
             setSortOrder('asc');
         } else if (sortCrit === crit) {

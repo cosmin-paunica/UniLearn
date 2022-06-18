@@ -59,7 +59,7 @@ export default function AddAssignmentForm(props: { courseId: string }) {
                             <td><input type="datetime-local" step="1" id="deadline" name="deadline" /></td>
                         </tr>
                         <tr>
-                            <td colSpan={2}><input type='submit' /></td>
+                            <td colSpan={2}><input type='submit' value="Add assignment" /></td>
                         </tr>
                     </tbody>
                 </table>

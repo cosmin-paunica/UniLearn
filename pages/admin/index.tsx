@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { getSession } from 'next-auth/react'
 import AdminUsersContainer from '../../components/AdminUsersContainer';
 import AdminCoursesContainer from '../../components/AdminCoursesContainer';
+import { SessionUser } from '../../lib/types';
 
 export default function Admin({ user }: InferGetServerSidePropsType<typeof getServerSideProps>) {
 
@@ -15,6 +16,7 @@ export default function Admin({ user }: InferGetServerSidePropsType<typeof getSe
             </Head>
 
             <main>
+                <h1>Admin</h1>
                 <AdminCoursesContainer />
                 <AdminUsersContainer />
             </main>
@@ -36,8 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // if user not ADMIN, redirect to /
-    // @ts-ignore
-    if (session.user!.role.toLocaleUpperCase() != 'ADMIN') {
+    if ((session.user! as SessionUser).role.toLocaleUpperCase() != 'ADMIN') {
         return {
             redirect: {
                 destination: '/',

@@ -6,9 +6,12 @@ import AddAssignmentForm from "../../../components/AddAssignmentForm";
 import AssignmentCard from "../../../components/AssignmentCard";
 import { getProfessorNamesAsString } from "../../../lib/helper_functions";
 import prisma from "../../../lib/prisma";
-import { SessionUser } from "../../../lib/types";
+import { AssignmentWithFileUploads, SessionUser } from "../../../lib/types";
+import superjson from 'superjson'
 
-export default function Course({ course, userRole, assignmentsJSONable: assignments, userId }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Course({ course, userRole, assignmentsJSON, userId }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const assignments: AssignmentWithFileUploads[] = superjson.parse(assignmentsJSON);
+    
     return (
         <>
             <Head>
@@ -26,7 +29,7 @@ export default function Course({ course, userRole, assignmentsJSONable: assignme
 
                 {userRole == 'PROFESSOR' && <AddAssignmentForm courseId={course.id} />}
 
-                {assignments.map((assignment: Assignment) => <AssignmentCard key={assignment.id} assignment={assignment} userId={userId} userRole={userRole} />)}
+                {assignments.map((assignment: AssignmentWithFileUploads) => <AssignmentCard key={assignment.id} assignment={assignment} userId={userId} userRole={userRole} />)}
             </main>
         </>
     )
@@ -59,24 +62,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const assignments = await prisma.assignment.findMany({
         where: { courseId: id },
+        include: {
+            fileUploads: {
+                where: { studentId: (session.user as SessionUser).id }
+            }
+        },
         orderBy: [{ deadline: 'desc' }]
     })
 
-    const assignmentsJSONable = assignments.map(({
-        id,
-        courseId,
-        title,
-        description,
-        dateAdded,
-        deadline 
-    }) => ({
-        id,
-        courseId,
-        title,
-        description,
-        dateAdded: dateAdded.toLocaleString(),
-        deadline: deadline.toLocaleString()
-    }));
+    const assignmentsJSON = superjson.stringify(assignments);
 
     const userRole = (await prisma.userInCourse.findFirst({
         where: {
@@ -87,6 +81,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }))?.userRole;
 
     return {
-        props: { course, userRole, assignmentsJSONable, userId: (session.user as SessionUser).id }
+        props: { course, userRole, assignmentsJSON, userId: (session.user as SessionUser).id }
     }
 }

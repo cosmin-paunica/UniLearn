@@ -12,6 +12,8 @@ const SignIn = () => {
             </Head>
 
             <main>
+                <h1>Sign In</h1>
+                <p>Welcome to UniLearn! Please sign in to continue</p>
                 <button onClick={() => signIn("azure-ad")}>Sign in with Microsoft account</button>
             </main>
         </>

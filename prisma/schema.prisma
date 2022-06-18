@@ -93,11 +93,10 @@ model Assignment {
 model AssignmentFileUpload {
   assignmentId String
   studentId    String
-  dateUploaded DateTime @default(now())
   fileName     String
 
-  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
-  student    User       @relation(fields: [studentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([assignmentId, studentId])
   @@map("assignment_file_uploads")
