@@ -46,9 +46,9 @@ export default function AssignmentCard({ assignment, userId, userRole }: { assig
 
     const handleDownload = async (event: any) => {
         axios.get(`/api/assignments/${assignment.id}/students`, {
-            responseType: 'arraybuffer',
+            responseType: 'blob',
             headers: {
-                'Content-Type': 'application/zip'
+                'Content-Type': 'application/json'
             }
         })
         .then((res) => {

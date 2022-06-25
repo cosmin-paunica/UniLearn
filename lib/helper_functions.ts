@@ -20,3 +20,7 @@ export function getProfessorNamesAsString(course: Course & {users: (UserInCourse
 export function localeDateToDate(dateString: string) {
     return new Date(dateString.substring(0, 10).split('.').reverse().join('.') + dateString.substring(12));
 }
+
+export function capitalize(str: string) {
+    return str.charAt(0).toLocaleUpperCase() + str.slice(1);
+}

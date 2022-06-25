@@ -9,3 +9,5 @@ export type CourseWithUsersAndAssignments = CourseWithUsers & CourseWithAssignme
 export type SessionUser = User & { id: string }
 
 export type AssignmentWithFileUploads = Assignment & { fileUploads: AssignmentFileUpload[] }
+
+export type UserInCourseWithUser = UserInCourse & { user: User }

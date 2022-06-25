@@ -6,7 +6,7 @@ export const validateAddAssignmentFormData = ({ title, description, deadline }: 
         validateAssignmentDescription(description) &&
         (new Date(deadline)).toString() != 'Invalid date' &&
         (new Date(deadline)) > (new Date())
-    )
+    );
 }
 
 const validateAcademicYear = (academicYear: string ) => {
@@ -21,7 +21,7 @@ const validateCourseOrAssignmentName = (name: string) => {
 }
 
 const validateAssignmentDescription = (description: string) => {
-    return /^[a-zA-Z0-9 .:;-]+$/.test(description);
+    return /^[a-zA-Z0-9 .:;-]+$/.test(removeDiacritics(description));
 }
 
 export const validateAddCourseFormData = ({ name, academicYear, year, semester }: { name: string, academicYear: string, year: number, semester: number}) => {

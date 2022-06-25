@@ -4,11 +4,12 @@ import { getSession } from 'next-auth/react'
 import Head from "next/head";
 import { FormEvent, useState } from "react";
 import prisma from "../../../lib/prisma";
+import { CourseWithUsers, UserInCourseWithUser } from "../../../lib/types";
 import { validateEmail } from '../../../lib/validations';
 
 export default function AdminCourse({ course }: InferGetServerSidePropsType<typeof getServerSideProps>) {
 
-    const usersInCourse = course.users;
+    const [usersInCourse, setUsersInCourse] = useState(course.users);
 
     const [addedUser, setAddedUser] = useState(false);
     const [errorAddingUser, setErrorAddingUser] = useState("");
@@ -35,10 +36,12 @@ export default function AdminCourse({ course }: InferGetServerSidePropsType<type
             const updatedCourseRes = await fetch(`../../api/courses/${course.id}/users/${userId}?userRole=${userRole}`, {
                 method: 'PUT'
             });
-            const updatedCourse = await updatedCourseRes.json();
+            const updatedCourse: CourseWithUsers = await updatedCourseRes.json();
+            const addedUserInCourse = updatedCourse.users.filter((userInCourse: UserInCourseWithUser) => userInCourse.userId == userId)[0];
 
             setErrorAddingUser("");
             setAddedUser(true);
+            setUsersInCourse([...usersInCourse, addedUserInCourse]);
         } catch(err: any) {
             setAddedUser(false);
             setErrorAddingUser(err.message);

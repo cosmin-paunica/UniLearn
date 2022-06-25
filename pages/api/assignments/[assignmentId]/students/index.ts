@@ -25,20 +25,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const fileNames = assignment.fileUploads.map((fileUpload: AssignmentFileUpload) => fileUpload.fileName);
 
             const archivePath = `./resources/assignment_archives/${assignmentId}.zip`;
-            createArchive(archivePath, fileNames);
+            const archiveOutput = await createArchive(archivePath, fileNames);
             
-            const archiveReadStream = fs.createReadStream(archivePath);
+            archiveOutput.on('close', () => {
+                const archiveReadStream = fs.createReadStream(archivePath);
 
-            res.writeHead(200, {
-                'Content-Type': 'application/zip',
-                'Content-Disposition': `attachment; filename=${assignment.title}.zip`
-            });
-
-            archiveReadStream.pipe(res);
+                res.writeHead(200, {
+                    'Content-Type': 'application/zip',
+                    'Content-Disposition': `attachment; filename=${assignment.title}.zip`
+                });
+    
+                archiveReadStream.pipe(res);
+            })
+            
     }
 }
 
-const createArchive = (archivePath: string, fileNames: string[]) => {
+const createArchive = async (archivePath: string, fileNames: string[]) => {
     const output = fs.createWriteStream(archivePath);
     const archive = archiver('zip');
 
@@ -49,5 +52,7 @@ const createArchive = (archivePath: string, fileNames: string[]) => {
     });
 
     archive.finalize();
+
+    return output;
     // await new Promise((resolve) => setTimeout(resolve, 5000));
 }

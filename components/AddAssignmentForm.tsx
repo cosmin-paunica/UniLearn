@@ -32,6 +32,7 @@ export default function AddAssignmentForm(props: { courseId: string }) {
             if (data.error) {
                 throw new Error('Invalid data');
             }
+            setInvalidData(false);
             setAddedAssignmentTitle(data.title);
         } catch {
             setAddedAssignmentTitle(null);

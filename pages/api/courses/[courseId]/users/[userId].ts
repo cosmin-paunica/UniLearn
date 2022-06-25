@@ -35,7 +35,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 },
                 include: {
-                    users: true
+                    users: {
+                        include: {
+                            user: true
+                        }
+                    }
                 },
                 where: {
                     id: courseId
