@@ -3,9 +3,31 @@ import prisma from "../../../../../lib/prisma";
 import fs from 'fs';
 import { Assignment, AssignmentFileUpload } from "@prisma/client";
 import archiver from 'archiver'
+import { getSession } from "next-auth/react";
+import { SessionUser } from "../../../../../lib/types";
 
 // GET: return all files uploaded by students as a zip archive 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+
+    // if not authenticated, respond with 401 Unauthorized
+    const session = await getSession({ req });
+    if (!session) {
+        return res.status(401).json({ error: 'Unauthenticated' });
+    }
+
+    // if user is not PROFESSOR in this course, respond with 403 Forbidden
+    const userRoleInCourse = (await prisma.userInCourse.findFirst({
+        where: {
+            userId: (session!.user! as SessionUser).id,
+            courseId: req.query.courseId as string
+        },
+        select: {
+            userRole: true
+        }
+    }))?.userRole;
+    if (userRoleInCourse != 'PROFESSOR') {
+        return res.status(403).json({ error: 'Unauthorized' })
+    }
 
     const assignmentId = req.query.assignmentId as string;
     
@@ -22,6 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     switch(req.method) {
         case('GET'):
+
             const fileNames = assignment.fileUploads.map((fileUpload: AssignmentFileUpload) => fileUpload.fileName);
 
             const archivePath = `./resources/assignment_archives/${assignmentId}.zip`;
@@ -54,5 +77,4 @@ const createArchive = async (archivePath: string, fileNames: string[]) => {
     archive.finalize();
 
     return output;
-    // await new Promise((resolve) => setTimeout(resolve, 5000));
 }

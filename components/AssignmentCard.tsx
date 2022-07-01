@@ -11,6 +11,8 @@ export default function AssignmentCard({ assignment, userId, userRole }: { assig
     const [file, setFile] = useState<File | null>(null);
     const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
     const [uploadError, setUploadError] = useState<string | null>(null);
+    const [deleteButtonClicked, setDeleteButtonClicked] = useState(false);
+    const [deleted, setDeleted] = useState(false);
 
     const deadlineHasPassed = (assignment.deadline) < (new Date(Date.now()));
     const deadlineClassName = (deadlineHasPassed && (assignment.fileUploads.length == 0) && userRole == "STUDENT"
@@ -56,31 +58,61 @@ export default function AssignmentCard({ assignment, userId, userRole }: { assig
         });
     }
 
+    const handleDeleteClick = (event: any) => {
+        setDeleteButtonClicked(true);
+    };
+
+    const handleDelete = async (event: any) => {
+        const res = await fetch(`/api/assignments/${assignment.id}`, {
+            method: 'DELETE'
+        });
+        setDeleted(true);
+    };
+
     return (
         <div className={styles.card}>
-            <h3>{assignment.title}</h3>
-            <div>{assignment.description}</div>
-            <div className={deadlineClassName}>Deadline: {assignment.deadline.toLocaleString('ro-RO')}</div>
-            
-            {assignment.fileUploads.length > 0 && (
-                <div>
-                    <span className="successMessage">You have uploaded a file for this assignment.</span>
-                    {!deadlineHasPassed && (
-                        <span> You can replace it by uploading again.</span>
-                    )}
-                </div>
-            )}
+            {deleted && <div className="successMessage">Deleted</div>}
 
-            {userRole == 'STUDENT' && !deadlineHasPassed && (
-                <form onSubmit={handleFileSubmit}>
-                    <input type="file" id="file" name="file" onChange={handleLocalUpload} />
-                    <input type="submit" value="Upload" />
-                </form>
+            {!deleted && (
+                <>
+                    <h3>{assignment.title}</h3>
+                    <div>{assignment.description}</div>
+                    <div className={deadlineClassName}>Deadline: {assignment.deadline.toLocaleString('ro-RO')}</div>
+                    
+                    {assignment.fileUploads.length > 0 && (
+                        <div>
+                            <span className="successMessage">You have uploaded a file for this assignment.</span>
+                            {!deadlineHasPassed && (
+                                <span> You can replace it by uploading again.</span>
+                            )}
+                        </div>
+                    )}
+
+                    {userRole == 'STUDENT' && !deadlineHasPassed && (
+                        <form onSubmit={handleFileSubmit}>
+                            <input type="file" id="file" name="file" onChange={handleLocalUpload} />
+                            <input type="submit" value="Upload" />
+                        </form>
+                    )}
+                    {uploadError && <div className="errorMessage">Error uploading file</div>}
+                    {uploadedFileName && <div className="successMessage">File uploaded successfully</div>}
+                
+                    {userRole == 'PROFESSOR' && (
+                        <>
+                            <button onClick={handleDownload}>Download student uploads</button>
+                            <button onClick={(event: any) => setDeleteButtonClicked(true)}>Delete</button>
+
+                            {deleteButtonClicked && (
+                                <>
+                                    <div className="errorMessage">Are you sure you wish to delete this assignment?</div>
+                                    <button onClick={handleDelete}>Yes</button>
+                                    <button onClick={(event: any) => setDeleteButtonClicked(false)}>No</button>
+                                </>
+                            )}
+                        </>
+                    )}
+                </>
             )}
-            {uploadError && <div className="errorMessage">Error uploading file</div>}
-            {uploadedFileName && <div className="successMessage">File uploaded successfully</div>}
-        
-            {userRole == 'PROFESSOR' && <button onClick={handleDownload}>Download student uploads</button>}
         </div>
     )
 }
