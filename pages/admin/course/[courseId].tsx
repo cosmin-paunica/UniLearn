@@ -14,6 +14,9 @@ export default function AdminCourse({ course }: InferGetServerSidePropsType<type
     const [addedUser, setAddedUser] = useState(false);
     const [errorAddingUser, setErrorAddingUser] = useState("");
 
+    const [removeUserIdClicked, setRemoveUserIdClicked] = useState<string | null>('null');
+    const [removedUserId, setRemovedUserId] = useState<string | null>('null');
+
     const handleSubmit = async (event: FormEvent) => {
 
         event.preventDefault();
@@ -45,6 +48,17 @@ export default function AdminCourse({ course }: InferGetServerSidePropsType<type
         } catch(err: any) {
             setAddedUser(false);
             setErrorAddingUser(err.message);
+        }
+    }
+
+    const handleRemoveUser = async (userId: string) => {
+        const res = await fetch(`/api/courses/${course.id}/users/${userId}`, {
+            method: 'DELETE'
+        });
+        const resData = await res.json();
+
+        if (resData && resData.message == 'Removed') {
+            setRemovedUserId(userId);
         }
     }
 
@@ -102,8 +116,23 @@ export default function AdminCourse({ course }: InferGetServerSidePropsType<type
                         // @ts-ignore
                         }).map((userInCourse: UserInCourse) => userInCourse.user).map((user: User) => (
                             <tr key={user.email}>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
+                                {user.id == removedUserId && <td className="successMessage">Removed</td>}
+                                {user.id != removedUserId && (
+                                    <>
+                                        <td>{user.name}</td>
+                                        <td>{user.email}</td>
+                                        <td>
+                                            <button onClick={(event: any) => setRemoveUserIdClicked(user.id)}>Remove</button>
+                                        </td>
+                                        {user.id == removeUserIdClicked && (
+                                            <td>
+                                                <span className="errorMessage">Are you sure?</span>
+                                                <button onClick={(event: any) => setRemoveUserIdClicked(null)}>No</button>
+                                                <button onClick={(event: any) => handleRemoveUser(user.id)}>Yes</button>
+                                            </td>
+                                        )}
+                                    </>
+                                )}
                             </tr>
                         ))}
                     </tbody>
@@ -124,8 +153,23 @@ export default function AdminCourse({ course }: InferGetServerSidePropsType<type
                         // @ts-ignore
                         }).map((userInCourse: UserInCourse) => userInCourse.user).map((user: User) => (
                             <tr key={user.email}>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
+                                {user.id == removedUserId && <td className="successMessage">Removed</td>}
+                                {user.id != removedUserId && (
+                                    <>
+                                        <td>{user.name}</td>
+                                        <td>{user.email}</td>
+                                        <td>
+                                            <button onClick={(event: any) => setRemoveUserIdClicked(user.id)}>Remove</button>
+                                        </td>
+                                        {user.id == removeUserIdClicked && (
+                                            <td>
+                                                <span className="errorMessage">Are you sure?</span>
+                                                <button onClick={(event: any) => setRemoveUserIdClicked(null)}>No</button>
+                                                <button onClick={(event: any) => handleRemoveUser(user.id)}>Yes</button>
+                                            </td>
+                                        )}
+                                    </>
+                                )}
                             </tr>
                         ))}
                     </tbody>
